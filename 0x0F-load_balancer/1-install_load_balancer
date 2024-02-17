@@ -12,7 +12,7 @@ apt-get -y install haproxy
 server_config=\
 "
 frontend  cybergirls_frontend
-frontend  cybergirls_frontend
+frontend  http-cybergirls_frontend
         bind *:80
         mode http
         default_backend cybergirls_backend
