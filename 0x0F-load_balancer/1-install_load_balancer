@@ -1,16 +1,8 @@
 #!/usr/bin/env bash
-# Create a script to install and configure HAProxy on lb-01 server
-# Configure HAProxy to send traffic to web-01 and web-02 servers
-# Distribute requests using a roundrobin algorithm
-# Make sure that HAProxy can be managed via an init script
-
-# Install and configure HAproxy on my lb-01 server.
-sudo apt-get -y update
-apt-get -y install haproxy
-
-# edit config file
-server_config=\
-"
+# Configure Nginx so that its HTTP response contains
+# a custom header
+#
+balancer="\
 frontend  cybergirls_frontend
 frontend  http-cybergirls_frontend
         bind *:80
@@ -21,13 +13,17 @@ backend cybergirls_backend
         server 455920-web-01 54.209.6.159:80 check
         server 455920-web-02 54.158.207.61:80 check
 "
-echo "$server_config" | sudo tee -a /etc/haproxy/haproxy.cfg
+# Update packages
+apt-get -y update
+apt-get -y upgrade
 
-# enable haproxy to be started by init script
-echo "ENABLED=1" | sudo tee -a /etc/default/haproxy
+# Add HAProxy PPA
+apt-get -y install software-properties-common
+add-apt-repository -y ppa:vbernat/haproxy-2.5
+apt-get -y update
 
-# Testing the HAproxy configuration file
-sudo haproxy -c -f /etc/haproxy/haproxy.cfg
-
-# Restart the Nginx service
-sudo service haproxy restart
+# Install HAProxy
+apt-get -y install haproxy
+cp -a /etc/haproxy/haproxy.cfg{,.orig}
+echo "$balancer" >> /etc/haproxy/haproxy.cfg
+service haproxy restart
